@@ -22,7 +22,7 @@ $ cmake --build ./build/
 ```
 3. The executable will be in the *build/Debug/* folder
 ```sh
-$ build/Debug/cv-project-1.exe
+$ build/Debug/edge-boundary-detection.exe
 ```
 4. Clean the build folder (Optional)
 ```sh
