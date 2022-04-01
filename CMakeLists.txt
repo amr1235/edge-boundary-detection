@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(cv-project-1 VERSION 0.1.0)
+project(edge-boundary-detection VERSION 0.1.0)
 
 include(CTest)
 enable_testing()
@@ -18,9 +18,9 @@ file(GLOB ALL_SRCS CONFIGURE_DEPENDS
         "${PROJECT_SOURCE_DIR}/src/*.c"
         )
 
-add_executable(cv-project-1 ${ALL_SRCS})
+add_executable(edge-boundary-detection ${ALL_SRCS})
 
-target_link_libraries(cv-project-1 ${OpenCV_LIBS} )
+target_link_libraries(edge-boundary-detection ${OpenCV_LIBS} )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
