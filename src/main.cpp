@@ -3,9 +3,8 @@
 #include <iostream>
 #include "Image.hpp"
 #include "cvector.hpp"
-#include "histogram.hpp"
 #include "utils.hpp"
-#include "task2.hpp"
+#include "hough_circle.hpp"
 #include <math.h>
 #include <cstdlib>
 #include <cmath>

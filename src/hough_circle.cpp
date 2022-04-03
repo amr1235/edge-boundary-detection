@@ -1,19 +1,14 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
-#include <iostream>
 #include "Image.hpp"
-#include "cvector.hpp"
-#include "histogram.hpp"
 #include "utils.hpp"
-#include <math.h>
-#include <cstdlib>
-#include <cmath>
-
 #include <opencv2\core.hpp>
 #include <opencv2\highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 
+using namespace std;
+using namespace img;
 
 cv::Mat hough_circle(cv::Mat _img, uint threshold)
 {
