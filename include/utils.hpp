@@ -16,5 +16,6 @@ void fftshift(const cv::Mat &input_img, cv::Mat &output_img);
 void DFT(cv::Mat &scr, cv::Mat &dst);
 void filtering(cv::Mat &scr, cv::Mat &dst, cv::Mat &H);
 cv::Mat construct_H(cv::Mat &scr, float D0,img::p_types pass_type);
-
+int count_edges(cv::Mat img,cv::Mat test);
+void draw_circle(cv::Mat img,int x,int y, int r);
 #endif
