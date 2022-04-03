@@ -3,7 +3,6 @@
 #include <iostream>
 #include "Image.hpp"
 #include "cvector.hpp"
-#include "histogram.hpp"
 #include "utils.hpp"
 #include <math.h>
 #include <cstdlib>
@@ -14,11 +13,34 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 
-unsigned char normalization(int oldmin, int oldmax, int newmin, int newmax, unsigned char value)
+using namespace std;
+using namespace cv;
+
+int count_edges(cv::Mat img,cv::Mat test)
 {
-  int oldrange = oldmax - oldmin;
-  int newrange = newmax - newmin;
-  return (newrange * (value - oldmin) / oldrange) + newmin;
+  int count =0;
+    for (int i = 0; i < img.rows; i++)
+      {
+        for (int j = 0; j < img.cols; j++)
+          {
+            test.at<uchar>(i, j) =0;
+            if((int)img.at<uchar>(i, j)!=0)
+            count = count +1;
+          }
+      }
+return count;
+}
+
+void draw_circle(cv::Mat img,int x,int y, int r)
+{
+  int a,b;
+    for (int theta = 0; theta < 360; theta++)
+  {
+    a = (int)(x-r - r*cos(theta*3.14159/180));
+    b = (int)(y - r*sin(theta*3.14159/180));
+    if ( a>0 && a<img.cols && b>0 && b<img.rows)
+    img.at<uchar>(a, b) =255;
+  }
 }
 
 cvector<cvector<double>> gaussian_kernel(int size, double std)
@@ -40,6 +62,7 @@ cvector<cvector<double>> gaussian_kernel(int size, double std)
 
   return filter;
 }
+
 void RGBtoHSV(float r, float g, float b, float *h, float *s, float *v)
 {
   r = r / 255.0;
@@ -130,104 +153,4 @@ void HSVtoRGB(float *fR, float *fG, float *fB, float fH, float fS, float fV)
   *fR += fM;
   *fG += fM;
   *fB += fM;
-}
-
-void fftshift(const Mat &input_img, Mat &output_img)
-{
-  output_img = input_img.clone();
-  int cx = output_img.cols / 2;
-  int cy = output_img.rows / 2;
-  Mat q1(output_img, Rect(0, 0, cx, cy));
-  Mat q2(output_img, Rect(cx, 0, cx, cy));
-  Mat q3(output_img, Rect(0, cy, cx, cy));
-  Mat q4(output_img, Rect(cx, cy, cx, cy));
-
-  Mat temp;
-  q1.copyTo(temp);
-  q4.copyTo(q1);
-  temp.copyTo(q4);
-  q2.copyTo(temp);
-  q3.copyTo(q2);
-  temp.copyTo(q3);
-}
-
-void DFT(Mat &scr, Mat &dst)
-{
-  // define mat consists of two mat, one for real values and the other for complex values
-  Mat planes[] = {scr, Mat::zeros(scr.size(), CV_32F)};
-  Mat complexImg;
-  merge(planes, 2, complexImg);
-
-  dft(complexImg, complexImg);
-  dst = complexImg;
-}
-
-void filtering(Mat &scr, Mat &dst, Mat &H)
-{
-  fftshift(H, H);
-  Mat planesH[] = {Mat_<float>(H.clone()), Mat_<float>(H.clone())};
-
-  Mat planes_dft[] = {scr, Mat::zeros(scr.size(), CV_32F)};
-  split(scr, planes_dft);
-
-  Mat planes_out[] = {Mat::zeros(scr.size(), CV_32F), Mat::zeros(scr.size(), CV_32F)};
-  planes_out[0] = planesH[0].mul(planes_dft[0]);
-  planes_out[1] = planesH[1].mul(planes_dft[1]);
-
-  merge(planes_out, 2, dst);
-}
-
-Mat construct_H(Mat &scr, float D0, p_types pass_type)
-{
-  Mat H(scr.size(), CV_32F, Scalar(1));
-  float D = 0;
-  for (int u = 0; u < H.rows; u++)
-  {
-    for (int v = 0; v < H.cols; v++)
-    {
-      D = sqrt((u - scr.rows / 2) * (u - scr.rows / 2) + (v - scr.cols / 2) * (v - scr.cols / 2));
-      if (pass_type == LOW_PASS_FILTER)
-      {
-        if (D > D0)
-        {
-          H.at<float>(u, v) = 0;
-        }
-      }
-      else
-      {
-        if (D < D0)
-        {
-          H.at<float>(u, v) = 0;
-        }
-      }
-    }
-  }
-  return H;
-}
-
-int count_edges(cv::Mat img,cv::Mat test)
-{
-  int count =0;
-    for (int i = 0; i < img.rows; i++)
-      {
-        for (int j = 0; j < img.cols; j++)
-          {
-            test.at<uchar>(i, j) =0;
-            if((int)img.at<uchar>(i, j)!=0)
-            count = count +1;
-          }
-      }
-return count;
-}
-
-void draw_circle(cv::Mat img,int x,int y, int r)
-{
-  int a,b;
-    for (int theta = 0; theta < 360; theta++)
-  {
-    a = (int)(x-r - r*cos(theta*3.14159/180));
-    b = (int)(y - r*sin(theta*3.14159/180));
-    if ( a>0 && a<img.cols && b>0 && b<img.rows)
-    img.at<uchar>(a, b) =255;
-  }
 }
