@@ -47,12 +47,7 @@ double contour_area(int numberOfPoints, int *x_cooridinates, int *y_cooridinates
     return std::abs(area / 2.0);
 }
 
-double points_distance(int x1, int y1, int x2, int y2)
-{
-
-    return sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
-}
-double avg_distance(int *x_points, int *y_points, int points_n)
+double contour_perimeter(int *x_points, int *y_points, int points_n)
 {
     double distance_sum = 0;
     for (int i = 0; i < points_n; i++)
@@ -66,8 +61,7 @@ double avg_distance(int *x_points, int *y_points, int points_n)
         double distance = points_distance(x_points[i], y_points[i], x_points[next_point], y_points[next_point]);
         distance_sum += distance;
     }
-    double avg_distance = distance_sum / points_n;
-    return avg_distance;
+    return distance_sum;
 }
 
 double internal_energy(int *x_points, int *y_points, int points_n, double alpha, double beta)
@@ -76,7 +70,7 @@ double internal_energy(int *x_points, int *y_points, int points_n, double alpha,
     double second_drev = 0;
     double cont_sum = 0;
     double first_driv = 0;
-    double avg_dist = avg_distance(x_points, y_points, points_n);
+    double avg_dist = contour_perimeter(x_points, y_points, points_n)/points_n;
     for (int i = 0; i < points_n; i++)
     {
         int next_point = i + 1;
@@ -107,14 +101,14 @@ img::Image external_energy(img::Image source)
     // return gray;
 }
 
-void greedy_contour(img::Image source, int iterations, int alpha, int beta, int gamma, int *x_points, int *y_points, int points_n, int window_size)
-{
+void greedy_contour(img::Image source, int iterations ,int alpha, int beta, int gamma,int* x_points, int* y_points, int points_n, int window_size, bool plot){
     img::Image sobel_energy = external_energy(source);
     cvector<cvector<int>> window = window_neighbours(window_size);
     int current_x[180];
     int current_y[180];
-    std::copy(x_points, x_points + points_n, current_x);
-    std::copy(y_points, y_points + points_n, current_y);
+    std::copy(x_points,x_points + points_n,current_x);
+    std::copy(y_points,y_points + points_n,current_y);
+    cv::Mat plot_img;
     int point_energy;
     int min_energy;
     int min_index;
@@ -122,29 +116,22 @@ void greedy_contour(img::Image source, int iterations, int alpha, int beta, int 
     int iteration = 0;
     bool loob = true;
     int threshold = 5;
-    int neighbours_size = pow(window_size, 2);
-    while (loob)
-    {
-        for (int i = 0; i < points_n; i++)
-        {
-            for (int j = 0; j < neighbours_size; j++)
-            {
+    int neighbours_size = pow(window_size,2);
+    while(loob){
+        for(int i=0;i<points_n;i++){
+            for(int j=0;j<neighbours_size;j++){
                 current_x[i] = x_points[i] + window[j][0];
                 current_y[i] = y_points[i] + window[j][1];
-                if (current_x[i] < sobel_energy.mat.rows && current_x[i] > 0 && current_y[i] > 0 && current_y[i] < sobel_energy.mat.cols)
-                {
+                if(current_x[i] < sobel_energy.mat.rows   && current_x[i] > 0 && current_y[i] > 0 && current_y[i] < sobel_energy.mat.cols){
                     // point_energy = sobel_energy.mat.at<uchar>(current_x[i],current_y[i]) * -1 * gamma;
-                    point_energy = sobel_energy.mat.at<uchar>(current_x[i], current_y[i]) * -1 * gamma + internal_energy(current_x, current_y, points_n, alpha, beta);
+                    point_energy = sobel_energy.mat.at<uchar>(current_x[i],current_y[i]) * -1 * gamma + internal_energy(current_x, current_y,points_n, alpha, beta);
                     // std::cout<< point_energy<<"$$";
-                    if (j == 0)
-                    {
+                    if(j==0){
                         min_energy = point_energy;
                         min_index = j;
                     }
-                    else
-                    {
-                        if (point_energy < min_energy)
-                        {
+                    else{
+                        if(point_energy < min_energy){
                             min_energy = point_energy;
                             min_index = j;
                         }
@@ -153,17 +140,23 @@ void greedy_contour(img::Image source, int iterations, int alpha, int beta, int 
             }
             x_points[i] = x_points[i] + window[min_index][0];
             y_points[i] = y_points[i] + window[min_index][1];
-            if (window[min_index][0] != 0 || window[min_index][1] != 0)
-            {
+            if(window[min_index][0] != 0 || window[min_index][1] != 0){
                 movements++;
             }
         }
         iteration++;
-        std::cout << iteration;
+        if(plot == true){
+            plot_img = source.mat.clone();
+            draw_contour(plot_img, points_n, x_points, y_points);
+            cv::imshow("Active Contour", plot_img);
+            cv::waitKey(10);
+            plot_img.release();
+        }
+        // std::cout<<iteration;
 
-        if (iteration > iterations || movements < threshold)
-        {
+        if(iteration > iterations || movements < threshold){
             loob = false;
+            cv::waitKey(0);
         }
     }
 }

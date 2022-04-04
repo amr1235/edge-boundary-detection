@@ -16,6 +16,12 @@
 using namespace std;
 using namespace cv;
 
+double points_distance(int x1, int y1, int x2, int y2)
+{
+
+    return sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
+}
+
 int count_edges(cv::Mat img,cv::Mat test)
 {
   int count =0;
