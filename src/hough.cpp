@@ -1,15 +1,47 @@
 #include "hough.hpp"
 #include <iostream>
 
-void hough_lines(cv::Mat &src, std::vector<cv::Vec2f> &lines, double r, double theta, int threshold)
+// initialize accumulator
+// for each edge pixel:
+//      for each theta:
+//          r = pixel.x * cos(theta) + pixel.y* sin(theta)
+//          acc[r][theta] += 1
+
+// threshold accumulator
+
+void hough_lines(cv::Mat &src, std::vector<cv::Vec2f> &lines, double r, double theta, unsigned int threshold)
 {
-    std::vector<cv::Vec3f> acc = {
-        cv::Vec3f(1,0,5),cv::Vec3f(1,0,0),cv::Vec3f(1,0,2),cv::Vec3f(1,0,4)
-    };
+    if (theta > 180 || theta < 0)
+        throw "theta must be between 0 and 180";
+    if (r > src.rows * src.cols)
+        throw "r must be smaller than or equal image size";
+
+    double mag = sqrt(src.rows * src.rows + src.cols * src.cols);
+    std::vector<std::vector<int>> acc(2 * mag, std::vector<int>(180/theta, 0));
+    
+    for (size_t row = 0; row < src.rows; row++)
+    {
+        for (size_t col = 0; col < src.cols; col++)
+        {
+            if (src.at<uchar>(row, col))
+            {
+                for (size_t i = 0; i < 180; i += theta)
+                {
+                    r = round(col * cos(i - 90) + row * sin(i - 90)) + mag;
+                    // std::cout << i << "\n";
+                    acc[r][i]++;
+                }
+            }
+        }
+    }
+
     for (size_t i = 0; i < acc.size(); i++)
     {
-        if(acc[i].operator[](2) >= threshold)
-            lines.push_back(cv::Vec2f(acc[i].operator[](0),acc[i].operator[](1)));
+        for (size_t j = 0; j < acc[0].size(); j++)
+        {
+            if (acc[i][j] >= threshold)
+                lines.push_back(cv::Vec2f(i, j));
+        }
     }
 }
 
