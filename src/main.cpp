@@ -7,6 +7,7 @@
 #include "cvector.hpp"
 #include "utils.hpp"
 #include "hough_circle.hpp"
+#include "hough_line.hpp"
 #include <math.h>
 #include <cstdlib>
 #include <cmath>
@@ -15,7 +16,19 @@
 using namespace cv;
 using namespace img;
 
-// cv.
+static void test_hough_lines()
+{
+    Image img("..\\..\\images\\lines.png");
+    std::vector<Vec2f> lines;
+    Image cny;
+    Canny(img.mat, cny.mat, 100, 150);
+    hough_lines(cny, lines, 50);
+    superimpose(img, lines, Scalar(0, 0, 255));
+    img.display("test");
+}
+
+
+
 int main(int argc, char **argv)
 {
     // hough circle
