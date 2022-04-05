@@ -27,31 +27,37 @@ static void test_hough_lines()
     img.display("test");
 }
 
-
-
-int main(int argc, char **argv)
+static void test_hough_circles()
 {
-    // hough circle
-    Image image = Image("D:\\sbme\\fourth year\\second term\\CV\\projects\\edge-boundary-detection\\images\\circs.png");
+    Image image = Image("..\\..\\images\\circles.png");
     Image fin;
     image.display("original image");
     fin.mat = hough_circle(image.mat, 20);
-
     fin.display("final circle detection recieved");
+}
 
+static void test_contours()
+{
     // active contour
-    Image original_image = Image("H:\\sbme\\CV\\edge-boundary-detection\\images\\coin.jpeg");
+    Image original_image = Image("..\\..\\images\\coin.jpeg");
     int points = 80;
     cv::Size sz = original_image.mat.size();
     int x_cooridinates[80];
     int y_cooridinates[80];
     circle_contour(Point(sz.width / 2, sz.height / 2), 150, points, x_cooridinates, y_cooridinates);
-    //greedy_contour(original_image, 100, 2, 0.9, 20, x_cooridinates, y_cooridinates, points, 5);
-    greedy_contour(original_image, 50 ,2.5, 0.9, 20,x_cooridinates, y_cooridinates, points, 11,true);
+    // greedy_contour(original_image, 100, 2, 0.9, 20, x_cooridinates, y_cooridinates, points, 5);
+    greedy_contour(original_image, 50, 2.5, 0.9, 20, x_cooridinates, y_cooridinates, points, 11, true);
     // calculate area of the contour
     double perimeter = contour_perimeter(x_cooridinates, y_cooridinates, points);
     double area = contour_area(points, x_cooridinates, y_cooridinates);
     std::cout << "[contour perimeter : " << perimeter << " ]" << std::endl;
     std::cout << "[contour area : " << area << " ]" << std::endl;
+}
+
+int main(int argc, char **argv)
+{
+    test_hough_lines();
+    test_hough_circles();
+    test_contours();
     return 0;
 }
